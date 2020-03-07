@@ -306,6 +306,7 @@ function MPD(_port, _host, _password){
         _private.state.playlists.forEach(function(playlist){
             playlists.push(playlist.playlist);
         });
+        playlists.sort();
         return playlists;
     };
 
