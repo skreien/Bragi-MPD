@@ -1281,6 +1281,7 @@ var UI = (function(){
         var playlist = getPlaylist(element);
         playlist.appendToQueue();
         switchToTab('queue');
+        getClient().play();
     }
 
 
@@ -1292,6 +1293,7 @@ var UI = (function(){
         var playlist = getPlaylist(element);
         playlist.loadIntoQueue();
         switchToTab('queue');
+        getClient().play();
     }
 
 
@@ -1432,6 +1434,30 @@ var UI = (function(){
         setPushedButton(element);
         var path = getFileListPath(element);
         getClient().addSongToQueueByFile(path);
+    }
+
+
+    /**
+     * play all songs under this directory random
+     */
+    function playDirectoryRandom(element){
+        setPushedButton(element);
+        var path = getFileListPath(element);
+        getClient().addSongToQueueByFile(path);
+        getClient().enableRandomPlay();
+        getClient().play();
+    }
+
+
+    /**
+     * add all songs to the queue
+     */
+    function addAllRandom(element){
+        setPushedButton(element);
+        var path = '/';
+        getClient().addSongToQueueByFile(path);
+        getClient().enableRandomPlay();
+        getClient().play();
     }
 
 
@@ -2239,6 +2265,8 @@ var UI = (function(){
         deletePlaylist:deletePlaylist,
         renamePlaylist:renamePlaylist,
         addDirectoryToQueue:addDirectoryToQueue,
+        playDirectoryRandom:playDirectoryRandom,
+        addAllRandom:addAllRandom,
         addDirectoryToPlaylist:addDirectoryToPlaylist,
         settingChange:settingChange,
         updateDB:updateDB,
