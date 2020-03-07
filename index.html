@@ -228,6 +228,7 @@ template for a file directory
             <div>
                 <span class="LIST_directory_path"></span>
                 <span class="LIST_song_add MPD_button colapse" onclick="UI.addDirectoryToQueue(this);event.stopPropagation();">Add All to Queue</span>
+                <span class="LIST_song_add MPD_button colapse" onclick="UI.playDirectoryRandom(this);event.stopPropagation();">Play all random</span>
                 <span class="LIST_song_add_playlist MPD_button colapse" onclick="UI.addDirectoryToPlaylist(this);event.stopPropagation();">Add All to Playlist</span>
             </div>
             <ul class="MPD_directory_children" onclick="event.stopPropagation();"></ul>
@@ -374,6 +375,7 @@ template for an output
                 <div class="MPD_queue LIST">
                     <ul class="LIST_header LIST_song_toolbar MPD_toolbar">
                         <li class="LIST_show_current MPD_button" onclick="UI.showCurrenSong(this);">Scroll to Current Song</li>
+                        <li class="LIST_show_current MPD_button" onclick="UI.addAllRandom(this);">Play all randomized</li>
                         <li class="LIST_queue_find MPD_button" onclick="UI.showQueueFind(this);">Find</li>
                         <li class="LIST_remove_current MPD_button" onclick="UI.removeCurrenSong(this);">Remove Current Song</li>
                         <li class="LIST_save_queue MPD_button" onclick="UI.saveQueueAsPlaylist(this);">Save Queue</li>
@@ -477,6 +479,15 @@ template for an output
                     </tr>
                     <tr>
                         <th>Update database:</th><td><input type="button" class="MPD_setting_update_db MPD_button" onclick="UI.updateDB(this);" value="Start"></input></td>
+                    </tr>
+                    <tr>
+                        <th>Turn on free play:</th><td><form name="sort" action="/cgi-bin/freeplay.cgi" method=post><input type="submit" value="Enable"></form></input></td>
+                    </tr>
+                    <tr>
+                        <th>Reboot Jukebox:</th><td><form name="sort" action="/cgi-bin/reboot.cgi" method=post><input type="submit" value="Reboot"></form></input></td>
+                    </tr>
+                    <tr>
+                        <th>Shutdown Jukebox:</th><td><form name="sort" action="/cgi-bin/shutdown.cgi" method=post><input type="submit" value="Shutdown"></form></input></td>
                     </tr>
                 </table>
             </div>
