@@ -28,10 +28,10 @@ var UI = (function(){
         //check for a user-specified config file in the url
         try{
             var current_url = new URL(window.location.href);
-            user_config_file = current_url.searchParams.get('config').replace('/', '').replace(':', '').replace('..', '').trim();
+            user_config_file = current_url.searchParams.get('config').replace('%', '').replace('/', '').replace(':', '').replace('..', '').trim();
         }
         catch(err){
-            //URLSearchParams not supported, won't load any user-specified config file
+            //URLSearchParams not supported or config parameter not set, won't load any user-specified config file
         }
 
         if (user_config_file){
@@ -56,6 +56,8 @@ var UI = (function(){
                     .attr('href', theme_file);
             });
         }
+
+        restoreColorSettings();
 
         setupFeatureDisabling();
 
@@ -157,6 +159,25 @@ var UI = (function(){
      */
     function getStream(){
         return $('audio.MPD_stream')[0];
+    }
+
+    /**
+     * restore color settings from localstorage or apply defaults
+     */
+    function restoreColorSettings(){
+        $('.MPD_colorslider').each(function(){
+            var which_setting = $(this).data('setting');
+
+            var value = localStorage.getItem('setting_color_' + which_setting);
+            if (value === null){
+                value = $(this).data('default');
+            }
+
+            $(this).val(value);
+        });
+
+        //it's only necessary to call colorChange() once because it always applies all color settings
+        colorChange();
     }
 
     /**
@@ -502,7 +523,21 @@ var UI = (function(){
         else{
             volume = client.getVolume();
         }
+
         $('input.MPD_volume').val(volume);
+        updateMuteIcons(volume)
+    }
+
+    /**
+     * update mute icons
+     */
+    function updateMuteIcons(volume){
+        if(volume < 0.005){
+            $('.MPD_controller_volume_icons .MPD_icon').addClass('mute');
+        }
+        else{
+            $('.MPD_controller_volume_icons .MPD_icon').removeClass('mute');
+        }
     }
 
     /**
@@ -860,7 +895,7 @@ var UI = (function(){
             document.title = title.substring(updatePageTitle.offset)+title.substring(0,updatePageTitle.offset);
         }
         else{
-            document.title = 'MPD Client';
+            document.title = 'Bragi MPD';
         }
     }
 
@@ -1255,6 +1290,8 @@ var UI = (function(){
             client.setVolume(volume);
             setPushedButton(element);
         }
+
+        updateMuteIcons(volume);
     }
 
 
@@ -1576,6 +1613,7 @@ var UI = (function(){
      */
     function settingChange(element){
         setPushedButton(element);
+
         var which_setting = $(element).data('setting');
         var value = $(element).is('input[type=checkbox]')?$(element).is(':checked'):$(element).val();
         //jquery on the subject of checkboxes: "because fuck your consistency and fuck you!"
@@ -1627,6 +1665,70 @@ var UI = (function(){
                 throw new Error('Unknown setting: "'+which_setting+'"');
             break;
         }
+    }
+
+    /**
+     * a UI color setting changed
+     */
+    function colorChange(element){
+        var filters = '';
+
+        $('.MPD_colorslider').each(function(){
+            var which_setting = $(this).data('setting');
+
+            var default_value = $(this).data('default');
+
+            var value = $(this).val();
+
+            if(value == default_value){
+                //changed to default value, so simply remove the setting from storage and don't apply this filter
+                localStorage.removeItem('setting_color_' + which_setting);
+                return;
+            }
+
+            //invert filter can't be set too close to 0.5, it eliminates contrast
+            if(which_setting == 'invert'){
+                if(value > 0.45 && value < 0.5){
+                    value = 0.45;
+                }
+                else if(value >= 0.5 && value < 0.55){
+                    value = 0.55;
+                }
+            }
+
+            //get unit (deg, %...)
+            var unit = $(this).data('unit');
+            if(!unit){
+                unit = '';
+            }
+
+            var new_filter = which_setting + '(' + value + unit + ')';
+
+            filters += ' ' + new_filter;
+
+            localStorage.setItem('setting_color_' + which_setting, value);
+        });
+
+        if(!filters){
+            filters = 'none';
+        }
+
+        //apply filters to UI
+        $('.UI_main').css('filter', filters);
+    }
+
+    /**
+     * reset a UI color setting back to the default
+     */
+    function colorReset(element){
+        var which_setting = $(element).data('setting');
+
+        var slider = $('[data-setting=' + which_setting + '].MPD_colorslider');
+
+        var value = slider.data('default');
+
+        slider.val(value);
+        colorChange();
     }
 
     /**
@@ -2269,6 +2371,8 @@ var UI = (function(){
         addAllRandom:addAllRandom,
         addDirectoryToPlaylist:addDirectoryToPlaylist,
         settingChange:settingChange,
+        colorChange:colorChange,
+        colorReset:colorReset,
         updateDB:updateDB,
         updateVolume:updateVolume,
         addSearchCriteria:addSearchCriteria,
