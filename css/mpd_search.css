@@ -1,6 +1,11 @@
 input.SEARCH_criteria_value, select.SEARCH_criteria_value{
     flex-grow: 2;
     width:0;
+    webkit-user-select: text;
+    khtml-user-select: text;
+    moz-user-select: text;
+    ms-user-select: text;
+    user-select: text;
 }
 
 .MPD_search form{
